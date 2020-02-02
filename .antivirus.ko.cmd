@@ -1,0 +1,1 @@
+cmd_/home/lu/Documents/Project2/antivirus.ko := ld -r -m elf_i386 -T ./scripts/module-common.lds --build-id  -o /home/lu/Documents/Project2/antivirus.ko /home/lu/Documents/Project2/antivirus.o /home/lu/Documents/Project2/antivirus.mod.o

@@ -5,20 +5,17 @@
 
 unsigned long **sys_call_table;
 
-asmlinkage int (*getuid_call)();
-asmlinkage long (*ref_sys_open)(void);
-asmlinkage long (*ref_sys_close)(void);
+asmlinkage long (*ref_sys_open)(const char* filename, int flags, int mode);
+asmlinkage long (*ref_sys_close)(unsigned int fd);
 asmlinkage long (*ref_sys_read)(void);
 
-getuid_call = sys_call_table[__NR_getuid];
-
-asmlinkage long new_sys_open(void) {
-  uid_t uid = getuid_call();
-  printk(KERN_INFO "User ID: %d", uid);
-  return 0;
+asmlinkage long new_sys_open(const char* filename, int flags, int mode) {
+  int id = current_uid().val;
+  if(id>=1000)printk(KERN_INFO "User %d is opening file: %s",id,filename);
+  return ref_sys_open(filename, flags, mode);
 }
 
-asmlinkage long new_sys_close(void) {
+asmlinkage long new_sys_close(unsigned int fd) {
   printk(KERN_INFO "\"'Hello world?!' More like 'Goodbye, world!' EXTERMINATE!\" -- Dalek");
   return 0;
 }
