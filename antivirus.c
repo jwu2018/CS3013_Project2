@@ -33,7 +33,7 @@ static unsigned long **find_sys_call_table(void) {
 
     if (sct[__NR_close] == (unsigned long *) sys_close) {
       printk(KERN_INFO "Interceptor: Found syscall table at address: 0x%02lX",
-	     (unsigned long) sct);
+       (unsigned long) sct);
       return sct;
     }
     
@@ -46,7 +46,6 @@ static unsigned long **find_sys_call_table(void) {
 static void disable_page_protection(void) {
   /*
     Control Register 0 (cr0) governs how the CPU operates.
-
     Bit #16, if set, prevents the CPU from writing to memory marked as
     read only. Well, our system call table meets that description.
     But, we can simply turn off this bit in cr0 to allow us to make
@@ -55,7 +54,6 @@ static void disable_page_protection(void) {
     the 16th bit (using a negation operation), causing the write_cr0
     value to have the 16th bit cleared (with all other bits staying
     the same. We will thus be able to write to the protected memory.
-
     It's good to be the kernel!
   */
   write_cr0 (read_cr0 () & (~ 0x10000));
