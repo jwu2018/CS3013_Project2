@@ -71,11 +71,12 @@ static int __init interceptor_start(void) {
   disable_page_protection();
 
   sys_call_table[__NR_cs3013_syscall1] = (unsigned long *)new_sys_cs3013_syscall1;
+  // printk("Changed the pointer");
   
   enable_page_protection();
   
   /* And indicate the load was successful */
-  printk(KERN_INFO "Loaded interceptor!");
+  printk(KERN_INFO "User %d is opening file:", 100);
 
   return 0;
 }
