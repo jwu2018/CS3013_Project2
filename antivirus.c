@@ -15,8 +15,9 @@ asmlinkage long new_sys_open(const char* filename, int flags, int mode) {
 }
 
 asmlinkage long new_sys_close(unsigned int fd) {
-  printk(KERN_INFO "\"'Hello world?!' More like 'Goodbye, world!' EXTERMINATE!\" -- Dalek");
-  return 0;
+  int id = current_uid().val;
+  if(id>=1000)printk(KERN_INFO "User %d is closing file descriptor: %s",id,fd);
+  return ref_sys_close(fd);
 }
 
 asmlinkage long new_sys_read(void) {
