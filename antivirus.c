@@ -114,11 +114,6 @@ static void __exit interceptor_end(void) {
   printk(KERN_INFO "Unloaded interceptor!");
 }
 
-static int getuid()
- {
-     return current_uid();
- }
-
 MODULE_LICENSE("GPL");
 module_init(interceptor_start);
 module_exit(interceptor_end);
