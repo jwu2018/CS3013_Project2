@@ -1,4 +1,4 @@
-obj-m := antivirus.o
+obj-m := example.o
 KDIR := /lib/modules/$(shell uname -r)/build
 PWD := $(shell pwd)
 
