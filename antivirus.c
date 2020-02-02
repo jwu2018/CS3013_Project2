@@ -1,15 +1,20 @@
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/syscalls.h>
+#include <linux/cred.h>
 
 unsigned long **sys_call_table;
 
+asmlinkage int (*getuid_call)();
 asmlinkage long (*ref_sys_open)(void);
 asmlinkage long (*ref_sys_close)(void);
 asmlinkage long (*ref_sys_read)(void);
 
+getuid_call = sys_call_table[__NR_getuid];
+
 asmlinkage long new_sys_open(void) {
-  printk(KERN_INFO "\"'Hello world?!' More like 'Goodbye, world!' EXTERMINATE!\" -- Dalek");
+  uid_t uid = getuid_call();
+  printk(KERN_INFO "User ID: %d", uid);
   return 0;
 }
 
@@ -108,6 +113,11 @@ static void __exit interceptor_end(void) {
 
   printk(KERN_INFO "Unloaded interceptor!");
 }
+
+static int getuid()
+ {
+     return current_uid();
+ }
 
 MODULE_LICENSE("GPL");
 module_init(interceptor_start);
