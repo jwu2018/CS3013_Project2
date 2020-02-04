@@ -2,6 +2,8 @@
 #include <linux/module.h>
 #include <linux/syscalls.h>
 #include <linux/cred.h>
+// #include <stdio.h> 
+// #include <fcntl.h> 
 
 unsigned long **sys_call_table;
 
@@ -19,7 +21,7 @@ asmlinkage long new_sys_open(const char* filename, int flags, int mode) {
 asmlinkage long new_sys_close(unsigned int fd) {
   int id = current_uid().val;
   if(id>=1000)
-    printk(KERN_INFO "User %d is closing file descriptor: %d",id,fd);
+    printk(KERN_INFO "User %d is closing file descriptor: %d\n",id,fd);
   return ref_sys_close(fd);
 }
 
@@ -27,9 +29,9 @@ asmlinkage long new_sys_close(unsigned int fd) {
  * @return the number of bytes that were read
  */
 asmlinkage long new_sys_read(unsigned int fd, void* buf, size_t count) {
-  char filename[];
-  struct stat sb;
-  asymlinkage long answer;
+  // char filename[count];
+  // struct stat sb;
+  long answer;
   int id = current_uid().val;
 
   // get filename
@@ -43,10 +45,10 @@ asmlinkage long new_sys_read(unsigned int fd, void* buf, size_t count) {
   // }
 
   // check for "zoinks"
-  answer = ref_sys_read(fd, buf, count);
+   answer = ref_sys_read(fd, buf, count);
   if (strstr(buf, "zoinks") != NULL) {
     if(id >= 1000) {
-      printk(KERN_INFO "User %d read file descriptor %d, but that file contained malicious code!",id,fd);
+      printk(KERN_INFO "User %d read file descriptor %d, but that file contained malicious code!\n",id,fd);
     }
   }
   return answer;
@@ -60,7 +62,7 @@ static unsigned long **find_sys_call_table(void) {
     sct = (unsigned long **)offset;
 
     if (sct[__NR_close] == (unsigned long *) sys_close) {
-      printk(KERN_INFO "Interceptor: Found syscall table at address: 0x%02lX",
+      printk(KERN_INFO "Interceptor: Found syscall table at address: 0x%02lX\n",
        (unsigned long) sct);
       return sct;
     }
