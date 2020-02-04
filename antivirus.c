@@ -7,23 +7,49 @@ unsigned long **sys_call_table;
 
 asmlinkage long (*ref_sys_open)(const char* filename, int flags, int mode);
 asmlinkage long (*ref_sys_close)(unsigned int fd);
-asmlinkage long (*ref_sys_read)(void);
+asmlinkage long (*ref_sys_read)(unsigned int fd, void* buf, size_t count);
 
 asmlinkage long new_sys_open(const char* filename, int flags, int mode) {
   int id = current_uid().val;
-  if(id>=1000)printk(KERN_INFO "User %d is opening file: %s",id,filename);
+  if(id>=1000)
+    printk(KERN_INFO "User %d is opening file: %s",id,filename);
   return ref_sys_open(filename, flags, mode);
 }
 
 asmlinkage long new_sys_close(unsigned int fd) {
   int id = current_uid().val;
-  if(id>=1000)printk(KERN_INFO "User %d is closing file descriptor: %s",id,fd);
+  if(id>=1000)
+    printk(KERN_INFO "User %d is closing file descriptor: %d",id,fd);
   return ref_sys_close(fd);
 }
 
-asmlinkage long new_sys_read(void) {
-  printk(KERN_INFO "\"'Hello world?!' More like 'Goodbye, world!' EXTERMINATE!\" -- Dalek");
-  return 0;
+/*
+ * @return the number of bytes that were read
+ */
+asmlinkage long new_sys_read(unsigned int fd, void* buf, size_t count) {
+  char filename[];
+  struct stat sb;
+  asymlinkage long answer;
+  int id = current_uid().val;
+
+  // get filename
+  // if (fcntl(fd, F_GETPATH, filename) != -1) {
+  //   if (stat(filename, &sb) == -1) {
+  //     perror("stat");
+  //   }
+  //   else { // get count
+  //      printf("File size: %lld bytes\n", (long long) sb.st_size);
+  //   }
+  // }
+
+  // check for "zoinks"
+  answer = ref_sys_read(fd, buf, count);
+  if (strstr(buf, "zoinks") != NULL) {
+    if(id >= 1000) {
+      printk(KERN_INFO "User %d read file descriptor %d, but that file contained malicious code!",id,fd);
+    }
+  }
+  return answer;
 }
 
 static unsigned long **find_sys_call_table(void) {
