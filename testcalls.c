@@ -16,7 +16,7 @@ long testCall3 ( void) {return (long) syscall(__NR_read);}
 int main () {
 	printf("The return values of the system calls are:\n");
 	printf("\t__NR_open: %ld\n", testCall1());
-	printf("\t__NR_close: %ld\n", testCall2());
 	printf("\t__NR_read: %ld\n", testCall3());
+	printf("\t__NR_close: %ld\n", testCall2());
 	return 0;
 }
