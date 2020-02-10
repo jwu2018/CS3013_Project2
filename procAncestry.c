@@ -14,87 +14,34 @@
 #include <asm/current.h>
 
 unsigned long **sys_call_table;
-long get_children(struct task_struct *target_task, struct ancestry *response);
-// long cs3013syscall2(unsigned short *target_pid,struct ancestry *response);
 
-struct ancestry {
-	pid_t ancestors[10];
-	pid_t siblings[100];
-	pid_t children[100];
+typedef struct ancestry {
+  pid_t ancestors[10];
+  pid_t siblings[100];
+  pid_t children[100];
 } ancestry;
 
-asmlinkage long (*ref_sys_)(unsigned int fd);
-// asmlinkage long (*ref_sys_read)(unsigned int fd, void* buf, size_t count);
+asmlinkage long (*ref_sys_cs3013_syscall2)(void);
 
-asmlinkage long fill_ancestry_struct(unsigned short *target_pid, struct ancestry *response) {
-	struct task_struct *p = current;
+asmlinkage long new_sys_cs3013_syscall2(unsigned short *target_pid, ancestry *response) {
+  // struct task_struct *p = current;
 
-	// get the task_struct of the target pid
-	read_lock(&tasklist_lock);
-	p = find_task_by_vpid(*target_pid);
-	if (p) get_task_struct(p);
-	read_unlock(&tasklist_lock);
+  printk(KERN_INFO "insertion for syscall2 worked");
 
-	// get the children
-	get_children(p, response);
-	// get the siblings
-	// get_siblings(p, response);
-	// get the ancestors
-	// get_ancestry(p, response);
+  unsigned short pid_cpy;
+  ancestry out_val;
 
-	// stack overflow says we need this line after using find_task_by_vpid
-	put_task_struct(p);
-  	return;
+  if(copy_from_user(&pid_cpy, target_pid, sizeof(short))) return EFAULT;
+  if(copy_from_user(&out_val, response, sizeof(ancestry))) return EFAULT;
+
+  printk(KERN_INFO "tracing pid: %d", *target_pid);
+
+  // get the task_struct of the target pid
+  // p = pid_task(find_vpid(*target_pid),PIDTYPE_PID);
+  // if (p) get_task_struct(p);
+
+  return 0;
 }
-
-/*
- * Finds all of the siblings of the target process and stores them in the
- * siblings list of the corresponding ancestry struct.
- */
-// asmlinkage long get_siblings(struct task_struct *target_task, struct ancestry *response) {
-
-// }
-
-
-/*
- * Finds all of the children of the target process and stores them in the
- * children list of the corresponding ancestry struct.
- */
- long get_children(struct task_struct *target_task, struct ancestry *response) {
- 	pid_t childAncestors[10];
- 	pid_t childSiblings[100];
- 	pid_t childChildren[100];
-
- 	for (int i = 0; i < 10; i++) {
- 		childAncestors[i] = -1;
- 		childSiblings[i] = -1;
- 		childChildren[i] = -1;
- 	}
- 	for (int i = 10; i < 100; i++) {
- 		childSiblings[i] = -1;
- 		childChildren[i] = -1;
- 	}
- 	struct ancestry childAncestry = { childAncestors, childSiblings, childChildren };
-
-	// get the youngest child
-	struct task_struct *yChild = target_task->p_cptr;
-	// get the pid of youngest child, store in response's children list
-	(response->children)[0] = *yChild.pid;
-	// get the youngest child's siblings
-	// for each sibling, store pid in response's children list
-	return 0;
-}
-
-
-
-/*
- * Finds all of the ancestors of the target process and stores them in the
- * ancestors list of the corresponding ancestry struct.
-//  */
-// asmlinkage long get_ancestry(struct task_struct *target_task, struct ancestry *response) {
-
-// }
-
 
 static unsigned long **find_sys_call_table(void) {
   unsigned long int offset = PAGE_OFFSET;
@@ -148,21 +95,17 @@ static int __init interceptor_start(void) {
   }
   
   /* Store a copy of all the existing functions */
-  // ref_sys_open = (void *)sys_call_table[__NR_open];
-  // ref_sys_close = (void *)sys_call_table[__NR_close];
-  // ref_sys_read = (void *)sys_call_table[__NR_read];
+  ref_sys_cs3013_syscall2 = (void *)sys_call_table[__NR_cs3013_syscall2];
 
   /* Replace the existing system calls */
   disable_page_protection();
 
-  // sys_call_table[__NR_open] = (unsigned long *)new_sys_open;
-  // sys_call_table[__NR_close] = (unsigned long *)new_sys_close;
-  // sys_call_table[__NR_read] = (unsigned long *)new_sys_read;
+  sys_call_table[__NR_cs3013_syscall2] = (unsigned long *)new_sys_cs3013_syscall2;
   
   enable_page_protection();
   
   /* And indicate the load was successful */
-  printk(KERN_INFO "Loaded interceptor!");
+  printk(KERN_INFO "Loaded interceptor!\n");
 
   return 0;
 }
@@ -174,9 +117,7 @@ static void __exit interceptor_end(void) {
   
   /* Revert all system calls to what they were before we began. */
   disable_page_protection();
-  // sys_call_table[__NR_open] = (unsigned long *)ref_sys_open;
-  // sys_call_table[__NR_close] = (unsigned long *)ref_sys_close;
-  // sys_call_table[__NR_read] = (unsigned long *)ref_sys_read;
+  sys_call_table[__NR_cs3013_syscall2] = (unsigned long *)ref_sys_cs3013_syscall2;
   enable_page_protection();
 
   printk(KERN_INFO "Unloaded interceptor!");
