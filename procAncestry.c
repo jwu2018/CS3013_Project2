@@ -13,38 +13,45 @@
 #include <linux/list.h>
 #include <asm/current.h>
 
-unsigned long **sys_call_table;
-long get_children(struct task_struct *target_task, struct ancestry *response);
-// long cs3013syscall2(unsigned short *target_pid,struct ancestry *response);
-
 struct ancestry {
 	pid_t ancestors[10];
 	pid_t siblings[100];
 	pid_t children[100];
 } ancestry;
 
+unsigned long **sys_call_table;
+long get_children(struct task_struct *target_task, struct ancestry *response);
+// long cs3013syscall2(unsigned short *target_pid,struct ancestry *response);
+
+
+
 asmlinkage long (*ref_sys_)(unsigned int fd);
 // asmlinkage long (*ref_sys_read)(unsigned int fd, void* buf, size_t count);
 
 asmlinkage long fill_ancestry_struct(unsigned short *target_pid, struct ancestry *response) {
-	struct task_struct *p = current;
+	struct pid *pid_struct;
+	struct task_struct *task;
 
-	// get the task_struct of the target pid
-	read_lock(&tasklist_lock);
-	p = find_task_by_vpid(*target_pid);
-	if (p) get_task_struct(p);
-	read_unlock(&tasklist_lock);
+	pid_struct = find_get_pid(*target_pid);
+	task = pid_task(pid_struct,PIDTYPE_PID);
+
+	// struct pid_t target = (pid_t) *target_pid;
+	// struct task_struct *p = current;
+	// p = find_get_pid(target);
+	// if (p)
+	// 	get_task_struct(p);
+	// read_unlock(&tasklist_lock);
 
 	// get the children
-	get_children(p, response);
+	get_children(task, response);
 	// get the siblings
 	// get_siblings(p, response);
 	// get the ancestors
 	// get_ancestry(p, response);
 
 	// stack overflow says we need this line after using find_task_by_vpid
-	put_task_struct(p);
-  	return;
+	// put_task_struct(p);
+  	return 1;
 }
 
 /*
@@ -61,23 +68,10 @@ asmlinkage long fill_ancestry_struct(unsigned short *target_pid, struct ancestry
  * children list of the corresponding ancestry struct.
  */
  long get_children(struct task_struct *target_task, struct ancestry *response) {
- 	pid_t childAncestors[10];
- 	pid_t childSiblings[100];
- 	pid_t childChildren[100];
-
- 	for (int i = 0; i < 10; i++) {
- 		childAncestors[i] = -1;
- 		childSiblings[i] = -1;
- 		childChildren[i] = -1;
- 	}
- 	for (int i = 10; i < 100; i++) {
- 		childSiblings[i] = -1;
- 		childChildren[i] = -1;
- 	}
- 	struct ancestry childAncestry = { childAncestors, childSiblings, childChildren };
+ 	struct ancestry childAncestry;
 
 	// get the youngest child
-	struct task_struct *yChild = target_task->p_cptr;
+	struct task_struct *yChild = target_task->children;
 	// get the pid of youngest child, store in response's children list
 	(response->children)[0] = *yChild.pid;
 	// get the youngest child's siblings
