@@ -1,4 +1,4 @@
-obj-m := antivirus.o procAncestry.o
+obj-m := antivirus.o procAncestry_kernel.o
 KDIR := /lib/modules/$(shell uname -r)/build
 PWD := $(shell pwd)
 CC=gcc
