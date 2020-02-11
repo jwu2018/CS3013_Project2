@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <getopt.h>
 // These values MUST match the unistd_32.h modifications:
 
 #define __NR_open 5
@@ -15,38 +16,27 @@ typedef struct ancestry {
 	pid_t children[100];
 } ancestry;
 
-long testCall1 ( void) {return (long) syscall(__NR_open, "zoinks.txt", 0);}
-
-long testCall2 ( void) {return (long) syscall(__NR_close);}
-
-long testCall3 ( void) {return (long) syscall(__NR_read);}
-
-long testCall4 (void){
+long testCall(unsigned short pid){
 	// unsigned short pid = getpid();
-	unsigned short pid = 3866;//4006;
 	// unsigned short pid = 1;
 	ancestry* fam = (ancestry*)malloc(sizeof(ancestry));
 	printf("getting ancestry of pid: %d\n", pid);
 	long syscall_ret = (long) syscall(__NR_sys_cs3013_syscall2, &pid, fam);
 	int i = 0;
-	unsigned short sib_pid, chid_pid, anc_pid;
+	unsigned short sib_pid, chid_pid;
 	for(;i < 100; i++){
 		if((sib_pid = fam->siblings[i]) == 0 && (chid_pid = fam->children[i])==0)break;
 		else printf("sib_pid: %hu, chid_pid: %hu\n", sib_pid, chid_pid);
 	}
-	i = 0;
-	for (;i < 10; i++) {
-		anc_pid = fam->ancestors[i];
-		printf("anc_pid: %hu\n", anc_pid);
-	}
 	return syscall_ret;
 }
 
-int main () {
+int main(int argc, char *argv[]) {
+  if(argc!=2){
+    printf("Please enter a single PID\n");
+    exit(-1);
+  }
 	printf("The return values of the system calls are:\n");
-	printf("\t__NR_open: %ld\n", testCall1());
-	printf("\t__NR_read: %ld\n", testCall3());
-	printf("\t__NR_close: %ld\n", testCall2());
-	printf("\t__NR_syscall2: %ld\n", testCall4());
+	printf("\t__NR_syscall2: %ld\n", testCall(atoi(argv[1])));
 	return 0;
 }
