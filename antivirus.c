@@ -51,16 +51,6 @@ asmlinkage long new_sys_read(unsigned int fd, void* buf, size_t count) {
   long answer;
   int id = current_uid().val;
 
-  // get filename
-  // if (fcntl(fd, F_GETPATH, filename) != -1) {
-  //   if (stat(filename, &sb) == -1) {
-  //     perror("stat");
-  //   }
-  //   else { // get count
-  //      printf("File size: %lld bytes\n", (long long) sb.st_size);
-  //   }
-  // }
-
   // check for "zoinks"
    answer = ref_sys_read(fd, buf, count);
   if (strstr(buf, "zoinks") != NULL) {

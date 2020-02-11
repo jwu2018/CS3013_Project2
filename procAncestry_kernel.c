@@ -24,7 +24,10 @@ typedef struct ancestry {
 asmlinkage long (*ref_sys_cs3013_syscall2)(void);
 
 /*
- * 
+ * Replaces the system call cs3013_syscall2 and prints out target process'
+ * children, siblings, and ancestors.
+ * @param target_pid, the process id of the target process
+ * @param response, the ancestry struct to fill out
  */
 asmlinkage long new_sys_cs3013_syscall2(unsigned short *target_pid, ancestry *response) {
 	printk(KERN_INFO "insertion for syscall2 worked");
@@ -104,6 +107,11 @@ asmlinkage long new_sys_cs3013_syscall2(unsigned short *target_pid, ancestry *re
   return 0;
 }
 
+
+/*
+ * Finds the sys call table.
+ * @return the address of the sys call table
+ */
 static unsigned long **find_sys_call_table(void) {
   unsigned long int offset = PAGE_OFFSET;
   unsigned long **sct;
@@ -122,6 +130,7 @@ static unsigned long **find_sys_call_table(void) {
   
   return NULL;
 }
+
 
 static void disable_page_protection(void) {
   /*
@@ -147,6 +156,11 @@ static void enable_page_protection(void) {
   write_cr0 (read_cr0 () | 0x10000);
 }
 
+/*
+ * Intercepts the system call cs3013_syscall2 and replaces
+ * it with a custom function that prints out the target process'
+ * children, siblings, and ancestors.
+ */
 static int __init interceptor_start(void) {
   /* Find the system call table */
   if(!(sys_call_table = find_sys_call_table())) {
@@ -171,6 +185,11 @@ static int __init interceptor_start(void) {
   return 0;
 }
 
+
+/*
+ * Ends the interceptor by replacing the system call with its
+ * correct pointer.
+ */
 static void __exit interceptor_end(void) {
   /* If we don't know what the syscall table is, don't bother. */
   if(!sys_call_table)
