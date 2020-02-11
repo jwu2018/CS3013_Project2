@@ -24,8 +24,13 @@ typedef struct ancestry {
 asmlinkage long (*ref_sys_cs3013_syscall2)(void);
 
 asmlinkage long new_sys_cs3013_syscall2(unsigned short *target_pid, ancestry *response) {
-	printk(KERN_INFO "insertion for syscall2 worked");
+	// printk(KERN_INFO "insertion for syscall2 worked");
 
+  struct task_struct* task_iterator;
+  struct task_struct *parent_task;  
+  int i = 0;
+  unsigned short sib_pid;
+  unsigned short cldn_pid;
 	struct task_struct* p;
 	unsigned short pid_cpy;
 	ancestry out_val;
@@ -38,12 +43,6 @@ asmlinkage long new_sys_cs3013_syscall2(unsigned short *target_pid, ancestry *re
 	// get the task_struct of the target pid
 	p = pid_task(find_vpid(*target_pid),PIDTYPE_PID);
 	// if (p) get_task_struct(p);
-
-	struct task_struct* task_iterator;
-	struct task_struct *parent_task;	
-	int i = 0;
-	unsigned short sib_pid;
-	unsigned short cldn_pid;
 
 	
 	//iterate through children
