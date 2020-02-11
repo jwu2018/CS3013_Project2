@@ -41,37 +41,60 @@ asmlinkage long new_sys_cs3013_syscall2(unsigned short *target_pid, ancestry *re
 	// if (p) get_task_struct(p);
 
 	struct task_struct* task_iterator;
-	struct task_struct *task;
-	struct task_struct *parent;	
+	struct task_struct *parent_task;	
 	int i = 0;
 	unsigned short sib_pid;
 	unsigned short cldn_pid;
 
-	//iterate through siblings
-	list_for_each_entry(task_iterator, &(p->sibling), sibling){
-		sib_pid = task_iterator->pid;
-		printk(KERN_INFO "sibling pid: %hu\n",sib_pid);
-		out_val.siblings[i] = sib_pid;
-		i++;
-	}
-	i = 0;
+	
 	//iterate through children
-	list_for_each_entry(task_iterator, &(p->children), children){
+	list_for_each_entry(task_iterator, &(p->children), sibling){
 		cldn_pid = task_iterator->pid;
-		printk(KERN_INFO "chilren pid: %hu\n",cldn_pid);
+		printk(KERN_INFO "children pid: %hu\n",cldn_pid);
 		out_val.children[i] = cldn_pid;
 		i++;
 	}
-	//iterate through ancestors
+	
+	// printk("og parent pid pid: %hu\n", task->parent->pid);
+	printk(KERN_INFO "finding ancestors for current pid: %hu\n", p->pid);
+	if (p->pid != 1) {
+		printk(KERN_INFO "current task isn't init\n");
+		i = 0;
+		//iterate through siblings
+		list_for_each_entry(task_iterator, &(p->sibling), sibling){
+			sib_pid = task_iterator->pid;
+			printk(KERN_INFO "sibling pid: %hu\n",sib_pid);
+			out_val.siblings[i] = sib_pid;
+			i++;
+		}
+		
 
-	parent = task->parent;
-	i = 0;
+		
 
-	do {
-		response->children[i] = parent->pid;
-		// printk(KERN_INFO "parent pid: %d", response->children[i]);
-		i++;
-	} while (parent->parent != &init_task);
+		//iterate through ancestors
+		parent_task = p->parent;
+	
+		// printk("og parent pid: %hu\n", parent->pid);
+		i = 0;
+
+		while (parent_task-> pid != 1) {
+			out_val.ancestors[i] = parent_task->pid;
+			printk("parent_task pid: %hu\n", out_val.ancestors[i]);
+			parent_task = parent_task->parent;
+			i++;
+			if (parent_task->pid == 1) {
+				out_val.ancestors[i] = parent_task->pid;
+				break;
+			}
+		}
+	}
+	else
+		printk(KERN_INFO "no ancestors, the current task is the init task\n");
+	// do {
+	// 	response->children[i] = parent->pid;
+	// 	// printk(KERN_INFO "parent pid: %d", response->children[i]);
+	// 	// i++;
+	// } while (parent->parent != &init_task);
 
   	// return 1;
 // }

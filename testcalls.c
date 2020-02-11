@@ -22,8 +22,8 @@ long testCall2 ( void) {return (long) syscall(__NR_close);}
 long testCall3 ( void) {return (long) syscall(__NR_read);}
 
 long testCall4 (void){
-	// unsigned short pid = getpid();
-	unsigned short pid = 1;
+	unsigned short pid = 3866;//4006;
+	// unsigned short pid = 1;
 	ancestry* fam = (ancestry*)malloc(sizeof(ancestry));
 	printf("getting ancestry of pid: %d\n", pid);
 	long syscall_ret = (long) syscall(__NR_sys_cs3013_syscall2, &pid, fam);
@@ -35,8 +35,8 @@ long testCall4 (void){
 	}
 	i = 0;
 	for (;i < 10; i++) {
-		if ((anc_pid = fam->ancestors[i])==0) break;
-		else printf("anc_pid: %hu\n", anc_pid);
+		anc_pid = fam->ancestors[i];
+		printf("anc_pid: %hu\n", anc_pid);
 	}
 	return syscall_ret;
 }
