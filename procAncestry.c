@@ -25,59 +25,51 @@ asmlinkage long (*ref_sys_cs3013_syscall2)(void);
 
 asmlinkage long new_sys_cs3013_syscall2(unsigned short *target_pid, ancestry *response) {
 
-  printk(KERN_INFO "insertion for syscall2 worked");
+	printk(KERN_INFO "insertion for syscall2 worked");
 
-  struct task_struct* p;
-  unsigned short pid_cpy;
-  ancestry out_val;
+	struct task_struct* p;
+	unsigned short pid_cpy;
+	ancestry out_val;
 
-  if(copy_from_user(&pid_cpy, target_pid, sizeof(short))) return EFAULT;
-  if(copy_from_user(&out_val, response, sizeof(ancestry))) return EFAULT;
+	if(copy_from_user(&pid_cpy, target_pid, sizeof(short))) return EFAULT;
+	if(copy_from_user(&out_val, response, sizeof(ancestry))) return EFAULT;
 
-  printk(KERN_INFO "tracing pid: %d\n", *target_pid);
+	printk(KERN_INFO "tracing pid: %d\n", *target_pid);
 
-  // get the task_struct of the target pid
-  p = pid_task(find_vpid(*target_pid),PIDTYPE_PID);
-  // if (p) get_task_struct(p);
+	// get the task_struct of the target pid
+	p = pid_task(find_vpid(*target_pid),PIDTYPE_PID);
+	// if (p) get_task_struct(p);
 
-  struct task_struct* task_iterator;
-  int i = 0;
-  unsigned short sib_pid;
-  unsigned short cldn_pid;
+	struct task_struct* task_iterator;
+	struct task_struct *task;
+	struct task_struct *parent;	
+	int i = 0;
+	unsigned short sib_pid;
+	unsigned short cldn_pid;
 
-  //iterate through siblings
-  list_for_each_entry(task_iterator, &(p->sibling), sibling){
-    sib_pid = task_iterator->pid;
-    printk(KERN_INFO "sibling pid: %hu\n",sib_pid);
-    out_val.siblings[i] = sib_pid;
-    i++;
-  }
-  i = 0;
-  //iterate through children
-  list_for_each_entry(task_iterator, &(p->children), children){
-    cldn_pid = task_iterator->pid;
-    printk(KERN_INFO "chilren pid: %hu\n",cldn_pid);
-    out_val.children[i] = cldn_pid;
-    i++;
-  }
-  //iterate through ancestors
-  // asmlinkage long fill_ancestry_struct(unsigned short *target_pid, struct ancestry *response) {
-	// struct pid *pid_struct;
-	// struct task_struct *task;
-	// struct task_struct *p;
-	// struct list_head *list;
-	// int i;
-	// int count;
-
-	// pid_struct = find_get_pid(*target_pid);
-	// p = pid_task(pid_struct, PIDTYPE_PID);
+	//iterate through siblings
+	list_for_each_entry(task_iterator, &(p->sibling), sibling){
+		sib_pid = task_iterator->pid;
+		printk(KERN_INFO "sibling pid: %hu\n",sib_pid);
+		out_val.siblings[i] = sib_pid;
+		i++;
+	}
+	i = 0;
+	//iterate through children
+	list_for_each_entry(task_iterator, &(p->children), children){
+		cldn_pid = task_iterator->pid;
+		printk(KERN_INFO "chilren pid: %hu\n",cldn_pid);
+		out_val.children[i] = cldn_pid;
+		i++;
+	}
+	//iterate through ancestors
 
 	parent = task->parent;
 	i = 0;
 
 	do {
 		response->children[i] = parent->pid;
-		printk(KERN_INFO "parent pid: %d", response->children[i]);
+		// printk(KERN_INFO "parent pid: %d", response->children[i]);
 		i++;
 	} while (parent->parent != &init_task);
 
