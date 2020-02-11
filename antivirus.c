@@ -11,6 +11,13 @@ asmlinkage long (*ref_sys_open)(const char* filename, int flags, int mode);
 asmlinkage long (*ref_sys_close)(unsigned int fd);
 asmlinkage long (*ref_sys_read)(unsigned int fd, void* buf, size_t count);
 
+/*
+ * Modifies the open system call and prints out a message to the kernel.
+ * @param filename, the file to open
+ * @param flags, the method of opening the file
+ * @param mode, the permissions of the file
+ * @return the file descriptor for the new file
+ */
 asmlinkage long new_sys_open(const char* filename, int flags, int mode) {
   int id = current_uid().val;
   if(id>=1000)
@@ -18,6 +25,11 @@ asmlinkage long new_sys_open(const char* filename, int flags, int mode) {
   return ref_sys_open(filename, flags, mode);
 }
 
+/*
+ * Modifies the close system call and prints out a message to the kernel.
+ * @param the file descriptor returned by open()
+ * @return 0 if it was successful, -1 otherwise
+ */
 asmlinkage long new_sys_close(unsigned int fd) {
   int id = current_uid().val;
   if(id>=1000)
@@ -26,7 +38,12 @@ asmlinkage long new_sys_close(unsigned int fd) {
 }
 
 /*
- * @return the number of bytes that were read
+ * Modifies the read system call and prints out a message to the kernel
+ * if the string "zoinks" was found while reading the file.
+ * @param fd, the file descriptor of the file to read
+ * @param buf, a buffer to read the file into
+ * @param count, the number of bytes to read from the file
+ * @return the number of bytes that were read if successful, -1 otherwise
  */
 asmlinkage long new_sys_read(unsigned int fd, void* buf, size_t count) {
   // char filename[count];
@@ -54,6 +71,10 @@ asmlinkage long new_sys_read(unsigned int fd, void* buf, size_t count) {
   return answer;
 }
 
+/*
+ * Finds the sys call table.
+ * @return the address of the sys call table
+ */
 static unsigned long **find_sys_call_table(void) {
   unsigned long int offset = PAGE_OFFSET;
   unsigned long **sct;
@@ -73,6 +94,10 @@ static unsigned long **find_sys_call_table(void) {
   return NULL;
 }
 
+
+/*
+ * Disables the page protection.
+ */
 static void disable_page_protection(void) {
   /*
     Control Register 0 (cr0) governs how the CPU operates.
@@ -89,6 +114,9 @@ static void disable_page_protection(void) {
   write_cr0 (read_cr0 () & (~ 0x10000));
 }
 
+/*
+ * Enables the page protection.
+ */
 static void enable_page_protection(void) {
   /*
    See the above description for cr0. Here, we use an OR to set the 
@@ -97,6 +125,10 @@ static void enable_page_protection(void) {
   write_cr0 (read_cr0 () | 0x10000);
 }
 
+
+/*
+ * 
+ */
 static int __init interceptor_start(void) {
   /* Find the system call table */
   if(!(sys_call_table = find_sys_call_table())) {
