@@ -24,21 +24,45 @@ typedef struct ancestry {
 asmlinkage long (*ref_sys_cs3013_syscall2)(void);
 
 asmlinkage long new_sys_cs3013_syscall2(unsigned short *target_pid, ancestry *response) {
-  // struct task_struct *p = current;
 
   printk(KERN_INFO "insertion for syscall2 worked");
 
+  struct task_struct* p;
   unsigned short pid_cpy;
   ancestry out_val;
 
   if(copy_from_user(&pid_cpy, target_pid, sizeof(short))) return EFAULT;
   if(copy_from_user(&out_val, response, sizeof(ancestry))) return EFAULT;
 
-  printk(KERN_INFO "tracing pid: %d", *target_pid);
+  printk(KERN_INFO "tracing pid: %d\n", *target_pid);
 
   // get the task_struct of the target pid
-  // p = pid_task(find_vpid(*target_pid),PIDTYPE_PID);
+  p = pid_task(find_vpid(*target_pid),PIDTYPE_PID);
   // if (p) get_task_struct(p);
+
+  struct task_struct* task_iterator;
+  int i = 0;
+  unsigned short sib_pid;
+  unsigned short cldn_pid;
+
+  //iterate through siblings
+  list_for_each_entry(task_iterator, &(p->sibling), sibling){
+    sib_pid = task_iterator->pid;
+    printk(KERN_INFO "sibling pid: %hu\n",sib_pid);
+    out_val.siblings[i] = sib_pid;
+    i++;
+  }
+  i = 0;
+  //iterate through children
+  list_for_each_entry(task_iterator, &(p->children), children){
+    cldn_pid = task_iterator->pid;
+    printk(KERN_INFO "chilren pid: %hu\n",cldn_pid);
+    out_val.children[i] = cldn_pid;
+    i++;
+  }
+  //iterate through ancestors
+
+  if(copy_to_user(response, &out_val, sizeof(ancestry))) return EFAULT;
 
   return 0;
 }
