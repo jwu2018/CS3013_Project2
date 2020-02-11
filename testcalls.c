@@ -22,8 +22,8 @@ long testCall2 ( void) {return (long) syscall(__NR_close);}
 long testCall3 ( void) {return (long) syscall(__NR_read);}
 
 long testCall4 (void){
-	// unsigned short pid = getpid();
-	unsigned short pid = 1;
+	unsigned short pid = getpid();
+	// unsigned short pid = 1;
 	ancestry* fam = (ancestry*)malloc(sizeof(ancestry));
 	printf("getting ancestry of pid: %d\n", pid);
 	long syscall_ret = (long) syscall(__NR_sys_cs3013_syscall2, &pid, fam);
