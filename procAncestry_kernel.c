@@ -23,6 +23,9 @@ typedef struct ancestry {
 
 asmlinkage long (*ref_sys_cs3013_syscall2)(void);
 
+/*
+ * 
+ */
 asmlinkage long new_sys_cs3013_syscall2(unsigned short *target_pid, ancestry *response) {
 	printk(KERN_INFO "insertion for syscall2 worked");
 

@@ -127,7 +127,8 @@ static void enable_page_protection(void) {
 
 
 /*
- * 
+ * Intercepts the system calls open, read, and close and replaces
+ * them with custom functions.
  */
 static int __init interceptor_start(void) {
   /* Find the system call table */
@@ -157,6 +158,10 @@ static int __init interceptor_start(void) {
   return 0;
 }
 
+/*
+ * Ends the interceptor by replacing the system calls with their
+ * correct pointers.
+ */
 static void __exit interceptor_end(void) {
   /* If we don't know what the syscall table is, don't bother. */
   if(!sys_call_table)
