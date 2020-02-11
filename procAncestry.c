@@ -61,6 +61,28 @@ asmlinkage long new_sys_cs3013_syscall2(unsigned short *target_pid, ancestry *re
     i++;
   }
   //iterate through ancestors
+  // asmlinkage long fill_ancestry_struct(unsigned short *target_pid, struct ancestry *response) {
+	// struct pid *pid_struct;
+	// struct task_struct *task;
+	// struct task_struct *p;
+	// struct list_head *list;
+	// int i;
+	// int count;
+
+	// pid_struct = find_get_pid(*target_pid);
+	// p = pid_task(pid_struct, PIDTYPE_PID);
+
+	parent = task->parent;
+	i = 0;
+
+	do {
+		response->children[i] = parent->pid;
+		printk(KERN_INFO "parent pid: %d", response->children[i]);
+		i++;
+	} while (parent->parent != &init_task);
+
+  	// return 1;
+// }
 
   if(copy_to_user(response, &out_val, sizeof(ancestry))) return EFAULT;
 
