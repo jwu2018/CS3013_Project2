@@ -80,10 +80,10 @@ asmlinkage long new_sys_cs3013_syscall2(unsigned short *target_pid, ancestry *re
 		if (parent_task->pid == 1) {
 			out_val.ancestors[i] = parent_task->pid;
 			printk("parent pid: %hu\n", out_val.ancestors[i]);
+      i++;
 		}
 	
 		// printk("og parent pid: %hu\n", parent->pid);
-		
 
 		while (parent_task-> pid != 1) {
 			out_val.ancestors[i] = parent_task->pid;
