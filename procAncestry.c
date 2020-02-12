@@ -16,6 +16,14 @@ typedef struct ancestry {
 	pid_t children[100];
 } ancestry;
 
+
+/*
+ * Calls the custom syscall2 function with the given target
+ * pid and prints out the target pid's children, siblings,
+ * and ancestors.
+ * @param pid, the target pid
+ * @return what the custom syscall2 function returned
+ */
 long testCall(unsigned short pid){
 	// unsigned short pid = getpid();
 	// unsigned short pid = 1;
@@ -36,6 +44,11 @@ long testCall(unsigned short pid){
 	return syscall_ret;
 }
 
+
+/*
+ * Gets a target pid from the user and sends that as an
+ * argument to our custom syscall2.
+ */
 int main(int argc, char *argv[]) {
   if(argc!=2){
     printf("Please enter a single PID\n");

@@ -32,11 +32,11 @@ asmlinkage long (*ref_sys_cs3013_syscall2)(void);
 asmlinkage long new_sys_cs3013_syscall2(unsigned short *target_pid, ancestry *response) {
 	// printk(KERN_INFO "insertion for syscall2 worked");
 
-  struct task_struct* task_iterator;
-  struct task_struct *parent_task;  
-  int i = 0;
-  unsigned short sib_pid;
-  unsigned short cldn_pid;
+	struct task_struct* task_iterator;
+	struct task_struct *parent_task;  
+	int i = 0;
+	unsigned short sib_pid;
+	unsigned short cldn_pid;
 	struct task_struct* p;
 	unsigned short pid_cpy;
 	ancestry out_val;
@@ -72,20 +72,27 @@ asmlinkage long new_sys_cs3013_syscall2(unsigned short *target_pid, ancestry *re
 			i++;
 		}
 
+		printk(KERN_INFO "finished siblings, onto parents\n");
 		//iterate through ancestors
 		parent_task = p->parent;
+		i = 0;
+		printk(KERN_INFO "this parent's pid is %hu\n", parent_task->pid);
+		if (parent_task->pid == 1) {
+			out_val.ancestors[i] = parent_task->pid;
+			printk("parent pid: %hu\n", out_val.ancestors[i]);
+		}
 	
 		// printk("og parent pid: %hu\n", parent->pid);
-		i = 0;
+		
 
 		while (parent_task-> pid != 1) {
 			out_val.ancestors[i] = parent_task->pid;
-			printk("parent_task pid: %hu\n", out_val.ancestors[i]);
+			printk("parent pid: %hu\n", out_val.ancestors[i]);
 			parent_task = parent_task->parent;
 			i++;
 			if (parent_task->pid == 1) {
 				out_val.ancestors[i] = parent_task->pid;
-				printk("parent_task pid: %hu\n", out_val.ancestors[i]);
+				printk("parent pid: %hu\n", out_val.ancestors[i]);
 				break;
 			}
 		}
