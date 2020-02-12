@@ -23,11 +23,16 @@ long testCall(unsigned short pid){
 	printf("getting ancestry of pid: %d\n", pid);
 	long syscall_ret = (long) syscall(__NR_sys_cs3013_syscall2, &pid, fam);
 	int i = 0;
-	unsigned short sib_pid, chid_pid;
+	unsigned short sib_pid, chid_pid, anc_pid;
 	for(;i < 100; i++){
-		if((sib_pid = fam->siblings[i]) == 0 && (chid_pid = fam->children[i])==0)break;
-		else printf("sib_pid: %hu, chid_pid: %hu\n", sib_pid, chid_pid);
+		if((sib_pid = fam->siblings[i]) != 0) printf("Sibling PID: %hu\n", sib_pid);
 	}
+  for(i = 0;i < 100; i++){
+    if((chid_pid= fam->children[i]) != 0) printf("Child PID: %hu\n", chid_pid);
+  }
+  for(i = 0;i < 10; i++){
+    if((anc_pid = fam->ancestors[i]) != 0)printf("Ancestor PID: %hu\n", anc_pid);
+  }
 	return syscall_ret;
 }
 
