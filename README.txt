@@ -29,8 +29,8 @@ the string "zoinks" was found while parsing through the file.
 ----------------------------------------------------------------
 Phase 2: procAncestry_kernel.c
 ----------------------------------------------------------------
-Functions:							Structs:
-	new_sys_cs3013_syscall2				ancestry
+Functions:						Structs:
+	new_sys_cs3013_syscall2			ancestry
 	find_sys_call_table
 	disable_page_protection
 	enable_page_protection
