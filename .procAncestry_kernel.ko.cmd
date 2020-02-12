@@ -1,0 +1,1 @@
+cmd_/home/jerfy/Documents/OS/CS3013_Project2/procAncestry_kernel.ko := ld -r -m elf_i386 -T ./scripts/module-common.lds --build-id  -o /home/jerfy/Documents/OS/CS3013_Project2/procAncestry_kernel.ko /home/jerfy/Documents/OS/CS3013_Project2/procAncestry_kernel.o /home/jerfy/Documents/OS/CS3013_Project2/procAncestry_kernel.mod.o
